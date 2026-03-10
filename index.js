@@ -98,10 +98,23 @@ client.on("messageCreate", async (message) => {
 
     if (message.content === "!keywords") {
       if (!db.keywords.length) {
-        await message.channel.send("📋 No keywords yet. Use `!addkeyword <word>` to add.");
+        await message.channel.send("No keywords yet. Use !addkeyword to add.");
         return;
       }
-      await message.channel.send(`📋 **Tracked Keywords (${db.keywords.length}):**\n${db.keywords.map((k, i) => `${i + 1}. \`${k}\``).join("\n")}`);
+      const lines = db.keywords.map((k, i) => (i + 1) + ". " + k);
+      const chunks = [];
+      let current = "Keywords (" + db.keywords.length + " total):\n";
+      for (const line of lines) {
+        if ((current + line + "\n").length > 1900) {
+          chunks.push(current);
+          current = "";
+        }
+        current += line + "\n";
+      }
+      if (current) chunks.push(current);
+      for (const chunk of chunks) {
+        await message.channel.send(chunk);
+      }
       return;
     }
 
